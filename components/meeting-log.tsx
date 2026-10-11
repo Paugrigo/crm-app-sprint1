@@ -29,6 +29,12 @@ export function MeetingLog() {
     setSaveFailed(!saveMeetings(next));
   }
 
+  function deleteMeeting(id: string) {
+    const next = meetings.filter((meeting) => meeting.id !== id);
+    setMeetings(next);
+    setSaveFailed(!saveMeetings(next));
+  }
+
   return (
     <div className="space-y-10">
       <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -52,7 +58,7 @@ export function MeetingLog() {
         <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
           Meetings <span className="font-normal text-zinc-500">({meetings.length})</span>
         </h2>
-        <MeetingList meetings={meetings} />
+        <MeetingList meetings={meetings} onDelete={deleteMeeting} />
       </section>
     </div>
   );

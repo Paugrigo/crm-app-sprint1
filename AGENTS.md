@@ -26,7 +26,8 @@ Users can log new meetings and add participants to them.
 ### Status
 
 - **Done:** meeting log page (`/`): a form to log a meeting (name, date, participants, notes) and a list of logged meetings, newest first.
-- **Not yet built:** editing and deleting meetings.
+- **Done:** deleting a meeting (trash-icon button on each list item, with a confirmation prompt).
+- **Not yet built:** editing meetings.
 
 ## Stack
 
