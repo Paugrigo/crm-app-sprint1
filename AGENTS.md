@@ -23,6 +23,11 @@ Each meeting has:
 
 Users can log new meetings and add participants to them.
 
+### Status
+
+- **Done:** meeting log page (`/`): a form to log a meeting (name, date, participants, notes) and a list of logged meetings, newest first.
+- **Not yet built:** editing and deleting meetings.
+
 ## Stack
 
 - Next.js 16 (App Router)
@@ -56,6 +61,10 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 ## Project structure
 
 - `app/`: App Router pages and layouts (`layout.tsx`, `page.tsx`, `globals.css`)
+- `components/`: UI components
+  - `meeting-log.tsx`: client component that owns meeting state and persistence; browser-only via `use(browser())`, so render it inside `<Suspense>`
+  - `meeting-form.tsx`: form for logging a meeting
+  - `meeting-list.tsx`: list of logged meetings
 - `lib/meetings.ts`: `Meeting` type and localStorage persistence
 - `public/`: static assets
 
