@@ -25,11 +25,9 @@ function isMeeting(value: unknown): value is Meeting {
   );
 }
 
-/** Returns saved meetings, or an empty list if storage is empty, unavailable, or corrupt. */
-export function loadMeetings(): Meeting[] {
+function parseMeetings(raw: string | null): Meeting[] {
+  if (raw === null) return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === null) return [];
     const parsed: unknown = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter(isMeeting) : [];
   } catch {
@@ -37,14 +35,61 @@ export function loadMeetings(): Meeting[] {
   }
 }
 
+// localStorage is the single source of truth. Components read it through useMeetings()
+// (useSyncExternalStore), so every mounted page re-renders when meetings change, including
+// pages Next.js keeps hidden in the background between navigations.
+
+const listeners = new Set<() => void>();
+const NO_MEETINGS: Meeting[] = [];
+let cachedRaw: string | null = null;
+let cachedMeetings: Meeting[] = NO_MEETINGS;
+
+/**
+ * Returns saved meetings, or an empty list if storage is empty, unavailable, or corrupt.
+ * Returns the same array until storage changes, as useSyncExternalStore requires.
+ */
+export function loadMeetings(): Meeting[] {
+  let raw: string | null;
+  try {
+    raw = localStorage.getItem(STORAGE_KEY);
+  } catch {
+    raw = null;
+  }
+  if (raw !== cachedRaw) {
+    cachedRaw = raw;
+    cachedMeetings = parseMeetings(raw);
+  }
+  return cachedMeetings;
+}
+
+/** Server snapshot for useSyncExternalStore; meetings only exist in the browser. */
+export function loadMeetingsOnServer(): Meeting[] {
+  return NO_MEETINGS;
+}
+
+/** Calls listener whenever meetings change in this tab or another tab. */
+export function subscribeToMeetings(listener: () => void): () => void {
+  function handleStorage(event: StorageEvent) {
+    // key is null when another tab cleared all storage.
+    if (event.key === STORAGE_KEY || event.key === null) listener();
+  }
+  listeners.add(listener);
+  window.addEventListener("storage", handleStorage);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", handleStorage);
+  };
+}
+
 /** Saves the full list of meetings. Returns false if storage is unavailable or full. */
 export function saveMeetings(meetings: Meeting[]): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(meetings));
-    return true;
   } catch {
     return false;
   }
+  listeners.forEach((listener) => listener());
+  return true;
 }
 
 /**

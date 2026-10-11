@@ -2,12 +2,8 @@
 
 import { use, useEffect, useState } from "react";
 import { browser } from "react-dom";
-import {
-  loadMeetings,
-  requestPersistentStorage,
-  saveMeetings,
-  type Meeting,
-} from "@/lib/meetings";
+import { requestPersistentStorage, saveMeetings, type Meeting } from "@/lib/meetings";
+import { useMeetings } from "@/lib/use-meetings";
 import { MeetingForm } from "./meeting-form";
 import { MeetingList } from "./meeting-list";
 
@@ -16,7 +12,7 @@ import { MeetingList } from "./meeting-list";
 export function MeetingLog() {
   use(browser("Meetings are stored in localStorage."));
 
-  const [meetings, setMeetings] = useState<Meeting[]>(loadMeetings);
+  const meetings = useMeetings();
   const [saveFailed, setSaveFailed] = useState(false);
 
   useEffect(() => {
@@ -24,15 +20,11 @@ export function MeetingLog() {
   }, []);
 
   function addMeeting(draft: Omit<Meeting, "id">) {
-    const next = [{ id: crypto.randomUUID(), ...draft }, ...meetings];
-    setMeetings(next);
-    setSaveFailed(!saveMeetings(next));
+    setSaveFailed(!saveMeetings([{ id: crypto.randomUUID(), ...draft }, ...meetings]));
   }
 
   function deleteMeeting(id: string) {
-    const next = meetings.filter((meeting) => meeting.id !== id);
-    setMeetings(next);
-    setSaveFailed(!saveMeetings(next));
+    setSaveFailed(!saveMeetings(meetings.filter((meeting) => meeting.id !== id)));
   }
 
   return (
@@ -49,8 +41,7 @@ export function MeetingLog() {
           role="alert"
           className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
         >
-          Couldn&apos;t save to browser storage. Recent changes will be lost when you reload the
-          page.
+          Couldn&apos;t save your change: browser storage is unavailable or full.
         </p>
       )}
 
