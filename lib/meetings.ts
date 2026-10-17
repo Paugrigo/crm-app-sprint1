@@ -92,6 +92,37 @@ export function saveMeetings(meetings: Meeting[]): boolean {
   return true;
 }
 
+// Backups: a JSON file the user downloads and can import later, e.g. in another browser.
+
+const BACKUP_FORMAT = "crm-meetings-backup";
+
+/** The contents of a backup file for these meetings. */
+export function meetingsToBackup(meetings: Meeting[]): string {
+  return JSON.stringify(
+    { format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(), meetings },
+    null,
+    2,
+  );
+}
+
+/**
+ * Reads meetings from a backup file. Also accepts a bare array of meetings (the raw
+ * localStorage format). Returns null if the file isn't a backup; skips invalid entries.
+ */
+export function meetingsFromBackup(text: string): Meeting[] | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  const list =
+    typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>).meetings
+      : parsed;
+  return Array.isArray(list) ? list.filter(isMeeting) : null;
+}
+
 /**
  * Asks the browser to exempt this site's storage from automatic eviction.
  * Firefox may prompt the user; Chromium and Safari decide silently.

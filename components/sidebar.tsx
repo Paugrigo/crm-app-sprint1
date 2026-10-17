@@ -6,6 +6,7 @@ import { Suspense, use, useEffect, useState } from "react";
 import { browser } from "react-dom";
 import { formatMeetingDate } from "@/lib/format-date";
 import { requestPersistentStorage } from "@/lib/meetings";
+import { subscribeToTheme } from "@/lib/theme";
 import { useMeetings } from "@/lib/use-meetings";
 
 const RECENT_LIMIT = 8;
@@ -28,8 +29,11 @@ export function Sidebar() {
     requestPersistentStorage();
   }, []);
 
+  // Apply theme changes made in other tabs (subscribing is enough; there's nothing to render).
+  useEffect(() => subscribeToTheme(() => {}), []);
+
   return (
-    <aside className="border-b border-zinc-200 bg-zinc-50 md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r dark:border-zinc-800 dark:bg-zinc-950">
+    <aside className="border-b border-zinc-200 bg-zinc-50 md:sticky md:flex md:flex-col md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex items-center justify-between px-4 py-4 md:px-5 md:py-6">
         <Link
           href="/"
@@ -52,11 +56,18 @@ export function Sidebar() {
       <nav
         id="app-menu"
         aria-label="Main"
-        className={`${open ? "block" : "hidden"} px-3 pb-4 md:block md:pb-6`}
+        className={`${open ? "flex" : "hidden"} flex-col px-3 pb-4 md:flex md:flex-1 md:pb-6`}
       >
         {/* The active link depends on the URL, and recent meetings on localStorage; neither
             is known while prerendering, so show plain links until the browser takes over. */}
-        <Suspense fallback={<MainLinks pathname={null} onNavigate={close} />}>
+        <Suspense
+          fallback={
+            <>
+              <MainLinks pathname={null} onNavigate={close} />
+              <SettingsLink pathname={null} onNavigate={close} />
+            </>
+          }
+        >
           <SidebarContent onNavigate={close} />
         </Suspense>
       </nav>
@@ -70,7 +81,45 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
     <>
       <MainLinks pathname={pathname} onNavigate={onNavigate} />
       <RecentMeetings pathname={pathname} onNavigate={onNavigate} />
+      <SettingsLink pathname={pathname} onNavigate={onNavigate} />
     </>
+  );
+}
+
+/** Pinned to the bottom of the sidebar on wider screens; last item in the phone menu. */
+function SettingsLink({
+  pathname,
+  onNavigate,
+}: {
+  pathname: string | null;
+  onNavigate: () => void;
+}) {
+  const active = pathname === "/settings";
+  return (
+    <div className="mt-6 border-t border-zinc-200 pt-3 md:mt-auto dark:border-zinc-800">
+      <Link
+        href="/settings"
+        onClick={onNavigate}
+        aria-current={active ? "page" : undefined}
+        className={`flex items-center gap-2 ${linkBase} ${active ? linkActive : linkIdle}`}
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-4"
+        >
+          <path d="M3.5 6h13M3.5 14h13" />
+          <circle cx="7.5" cy="6" r="1.75" fill="currentColor" />
+          <circle cx="12.5" cy="14" r="1.75" fill="currentColor" />
+        </svg>
+        Settings
+      </Link>
+    </div>
   );
 }
 

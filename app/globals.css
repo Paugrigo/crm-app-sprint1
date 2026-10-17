@@ -1,10 +1,25 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode: forced by data-theme="dark" on <html>, or following the OS unless
+ * data-theme="light" forces light. No data-theme means "system" (see lib/theme.ts).
+ */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* Lets native controls (e.g. the date picker popup) follow the light/dark theme. */
-  color-scheme: light dark;
+  /* Lets native controls (scrollbars, inputs) match the theme. */
+  color-scheme: light;
 }
 
 @theme inline {
@@ -14,10 +29,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
+:root[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --background: #0a0a0a;
     --foreground: #ededed;
+    color-scheme: dark;
   }
 }
 
