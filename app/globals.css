@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Lets native controls (e.g. the date picker popup) follow the light/dark theme. */
+  color-scheme: light dark;
 }
 
 @theme inline {

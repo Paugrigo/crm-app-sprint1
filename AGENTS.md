@@ -75,6 +75,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
   - `meeting-log.tsx`: client component for `/` that owns meeting state and persistence; browser-only via `use(browser())`, so render it inside `<Suspense>`
   - `meeting-detail.tsx`: client component for `/meetings/[id]`; browser-only, same rule
   - `meeting-form.tsx`: form for logging a meeting
+  - `date-picker.tsx`: date input with a custom calendar popover that follows the light/dark theme (the browser's native picker popup can't be styled)
   - `meeting-list.tsx`: list of logged meetings, each linking to its page
   - `delete-meeting-button.tsx`: trash-icon button with a confirmation prompt
 - `lib/meetings.ts`: `Meeting` type, localStorage read/save, and change subscription

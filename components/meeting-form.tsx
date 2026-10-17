@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type KeyboardEvent } from "react";
 import type { Meeting } from "@/lib/meetings";
+import { DatePicker } from "./date-picker";
 
 type MeetingDraft = Omit<Meeting, "id">;
 
@@ -85,12 +86,11 @@ export function MeetingForm({ onSubmit }: { onSubmit: (draft: MeetingDraft) => v
           <label htmlFor="meeting-date" className={labelClass}>
             Date
           </label>
-          <input
+          <DatePicker
             id="meeting-date"
-            type="date"
             required
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={setDate}
             className={inputClass}
           />
         </div>
