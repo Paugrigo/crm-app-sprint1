@@ -47,41 +47,49 @@ export type MergeResult = BackupData & {
 
 /**
  * Merges imported data into the current data. Imported meetings and tags replace ones with
- * the same ID; everything else is kept. An imported tag whose name matches an existing tag
- * (but with a different ID) is treated as that tag, so importing never creates duplicates.
+ * the same ID; everything else is kept. An imported tag whose name matches another tag (one
+ * with a different ID) is merged into that tag, so importing never creates duplicate names.
+ * That includes an existing tag that the backup renames to another tag's name: it is merged
+ * too, and its meetings, here or in the backup, move to the other tag.
  */
 export function mergeBackup(current: BackupData, imported: BackupData): MergeResult {
-  // Map each imported tag ID to the ID it will have after merging.
-  const tagIdMap = new Map<string, string>();
+  // Tag IDs merged into another tag, mapped to that tag's ID. Other IDs stay as they are.
+  const mergedTagIds = new Map<string, string>();
+  function resolveTagId(id: string): string {
+    // Follow chains: a tag can be merged into one that is itself merged later.
+    let resolved = id;
+    let next: string | undefined;
+    while ((next = mergedTagIds.get(resolved)) !== undefined) resolved = next;
+    return resolved;
+  }
+
   const tagsById = new Map(current.tags.map((t) => [t.id, t]));
   let newTags = 0;
   for (const tag of imported.tags) {
-    if (tagsById.has(tag.id)) {
-      tagsById.set(tag.id, tag);
-      tagIdMap.set(tag.id, tag.id);
-      continue;
-    }
-    const sameName = [...tagsById.values()].find((t) => sameTagName(t.name, tag.name));
+    const sameName = [...tagsById.values()].find(
+      (t) => t.id !== tag.id && sameTagName(t.name, tag.name),
+    );
     if (sameName) {
-      tagIdMap.set(tag.id, sameName.id);
+      mergedTagIds.set(tag.id, sameName.id);
+      tagsById.delete(tag.id);
     } else {
+      if (!tagsById.has(tag.id)) newTags++;
       tagsById.set(tag.id, tag);
-      tagIdMap.set(tag.id, tag.id);
-      newTags++;
     }
   }
 
-  const importedMeetings = imported.meetings.map((m) => ({
-    ...m,
-    tagIds: [...new Set(m.tagIds.map((id) => tagIdMap.get(id) ?? id))],
-  }));
+  function withMergedTags(meeting: Meeting): Meeting {
+    return { ...meeting, tagIds: [...new Set(meeting.tagIds.map(resolveTagId))] };
+  }
+
+  const importedMeetings = imported.meetings.map(withMergedTags);
   const currentIds = new Set(current.meetings.map((m) => m.id));
   const importedById = new Map(importedMeetings.map((m) => [m.id, m]));
   const updatedMeetings = importedMeetings.filter((m) => currentIds.has(m.id)).length;
 
   return {
     meetings: [
-      ...current.meetings.map((m) => importedById.get(m.id) ?? m),
+      ...current.meetings.map((m) => importedById.get(m.id) ?? withMergedTags(m)),
       ...importedMeetings.filter((m) => !currentIds.has(m.id)),
     ],
     tags: [...tagsById.values()],
