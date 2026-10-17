@@ -10,6 +10,17 @@ import { useMeetings } from "@/lib/use-meetings";
 import { DeleteMeetingButton } from "./delete-meeting-button";
 import { MeetingForm } from "./meeting-form";
 import { MeetingTags } from "./meeting-tags";
+import {
+  buttonPrimary,
+  buttonSecondary,
+  emptyState,
+  errorBox,
+  label,
+  panel,
+  panelHeader,
+} from "./ui";
+
+const fieldRow = "grid gap-1.5 px-5 py-3 sm:grid-cols-[8rem_1fr] sm:gap-4";
 
 // Browser-only: meetings come from localStorage, which doesn't exist during prerendering.
 // Render inside a <Suspense> boundary.
@@ -58,16 +69,14 @@ export function MeetingDetail({ id }: { id: string }) {
 
   if (!meeting) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
+      <div className={emptyState}>
         <title>Meeting not found · Meeting log</title>
-        <p className="font-medium text-zinc-900 dark:text-zinc-100">Meeting not found</p>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className={label}>Not found</p>
+        <p className="mt-2 font-medium text-fg">Meeting not found</p>
+        <p className="mt-1 text-sm text-muted">
           It may have been deleted, or it was saved in a different browser.
         </p>
-        <Link
-          href="/"
-          className="mt-4 inline-block rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <Link href="/" className={`${buttonPrimary} mt-4`}>
           Go to meeting log
         </Link>
       </div>
@@ -75,15 +84,12 @@ export function MeetingDetail({ id }: { id: string }) {
   }
 
   return (
-    <article className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+    <article className={`${panel} overflow-hidden`}>
       {/* React hoists <title> into <head>, so bookmarks get the meeting's name. */}
       <title>{`${meeting.name} · Meeting log`}</title>
 
       {failedAction && (
-        <p
-          role="alert"
-          className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
-        >
+        <p role="alert" className={`${errorBox} m-4 mb-0`}>
           {failedAction === "save"
             ? "Couldn't save your changes: browser storage is unavailable or full."
             : "Couldn't delete: browser storage is unavailable."}
@@ -92,32 +98,31 @@ export function MeetingDetail({ id }: { id: string }) {
 
       {editing ? (
         <>
-          <h1 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            Edit meeting
-          </h1>
-          <MeetingForm
-            initial={meeting}
-            submitLabel="Save changes"
-            onSubmit={updateMeeting}
-            onCancel={() => {
-              setEditing(false);
-              setFailedAction(null);
-            }}
-          />
+          <div className={panelHeader}>
+            <h1 className={label}>Edit meeting</h1>
+          </div>
+          <div className="p-5">
+            <MeetingForm
+              initial={meeting}
+              submitLabel="Save changes"
+              onSubmit={updateMeeting}
+              onCancel={() => {
+                setEditing(false);
+                setFailedAction(null);
+              }}
+            />
+          </div>
         </>
       ) : (
         <>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-4">
+            <div className="min-w-0">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-accent-fg">
+                Meeting
+              </p>
+              <h1 className="mt-1 break-words text-xl font-semibold tracking-tight text-fg">
                 {meeting.name}
               </h1>
-              <time
-                dateTime={meeting.date}
-                className="mt-1 block text-sm text-zinc-500 dark:text-zinc-400"
-              >
-                {formatMeetingDate(meeting.date)}
-              </time>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -128,7 +133,7 @@ export function MeetingDetail({ id }: { id: string }) {
                 }}
                 aria-label={`Edit ${meeting.name}`}
                 title="Edit meeting"
-                className="flex items-center gap-1.5 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus:ring-zinc-800"
+                className={buttonSecondary}
               >
                 <svg
                   aria-hidden="true"
@@ -148,39 +153,58 @@ export function MeetingDetail({ id }: { id: string }) {
             </div>
           </div>
 
-          <section className="mt-6">
-            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Participants</h2>
-            {meeting.participants.length > 0 ? (
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {meeting.participants.map((participant) => (
-                  <li
-                    key={participant}
-                    className="rounded-full bg-zinc-100 px-3 py-1 text-sm text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200"
-                  >
-                    {participant}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">No participants added.</p>
-            )}
-          </section>
-
-          <section className="mt-6">
-            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Tags</h2>
-            <MeetingTags tagIds={meeting.tagIds} className="mt-2" emptyMessage="No tags." />
-          </section>
-
-          <section className="mt-6">
-            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Notes</h2>
-            {meeting.notes ? (
-              <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-800 dark:text-zinc-200">
-                {meeting.notes}
-              </p>
-            ) : (
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">No notes.</p>
-            )}
-          </section>
+          {/* Key-value grid: mono keys on the left, values on the right (stacked on phones). */}
+          <dl className="divide-y divide-line">
+            <div className={fieldRow}>
+              <dt className={label}>Date</dt>
+              <dd>
+                <time
+                  dateTime={meeting.date}
+                  title={formatMeetingDate(meeting.date)}
+                  className="font-mono text-sm text-fg"
+                >
+                  {meeting.date}
+                </time>
+              </dd>
+            </div>
+            <div className={fieldRow}>
+              <dt className={label}>Participants</dt>
+              <dd>
+                {meeting.participants.length > 0 ? (
+                  <ul className="flex flex-wrap gap-1.5">
+                    {meeting.participants.map((participant) => (
+                      <li
+                        key={participant}
+                        className="rounded-sm border border-line bg-surface-2 px-2 py-0.5 text-sm text-fg"
+                      >
+                        {participant}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-faint">No participants added.</p>
+                )}
+              </dd>
+            </div>
+            <div className={fieldRow}>
+              <dt className={label}>Tags</dt>
+              <dd>
+                <MeetingTags tagIds={meeting.tagIds} emptyMessage="No tags." />
+              </dd>
+            </div>
+            <div className={fieldRow}>
+              <dt className={label}>Notes</dt>
+              <dd>
+                {meeting.notes ? (
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-fg">
+                    {meeting.notes}
+                  </p>
+                ) : (
+                  <p className="text-sm text-faint">No notes.</p>
+                )}
+              </dd>
+            </div>
+          </dl>
         </>
       )}
     </article>

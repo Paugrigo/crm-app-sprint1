@@ -95,7 +95,7 @@ export function DatePicker({
   const monthLabel = viewMonth.toLocaleDateString("en", { month: "long", year: "numeric" });
 
   const navButtonClass =
-    "rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 dark:focus:ring-zinc-700";
+    "rounded-sm p-1.5 text-muted hover:bg-surface-2 hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60";
 
   return (
     <div ref={containerRef} className="relative">
@@ -116,7 +116,7 @@ export function DatePicker({
         aria-expanded={open}
         aria-haspopup="dialog"
         title="Choose date"
-        className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2.5 text-zinc-500 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-100 dark:focus:ring-zinc-800"
+        className="absolute inset-y-0 right-0 flex items-center rounded-r-sm px-2.5 text-muted hover:text-accent-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
       >
         <svg
           aria-hidden="true"
@@ -136,7 +136,7 @@ export function DatePicker({
         <div
           role="dialog"
           aria-label="Choose date"
-          className="absolute right-0 top-full z-20 mt-2 w-72 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-black/50"
+          className="absolute right-0 top-full z-20 mt-1 w-72 rounded-md border border-line-strong bg-surface p-3 shadow-xl shadow-black/10 dark:shadow-black/60"
         >
           <div className="mb-2 flex items-center justify-between">
             <button
@@ -149,7 +149,7 @@ export function DatePicker({
                 <path d="M12.5 5l-5 5 5 5" />
               </svg>
             </button>
-            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100" aria-live="polite">
+            <span className="font-mono text-xs font-medium uppercase tracking-wider text-fg" aria-live="polite">
               {monthLabel}
             </span>
             <button
@@ -166,7 +166,7 @@ export function DatePicker({
 
           <div className="grid grid-cols-7 gap-1 text-center">
             {WEEKDAYS.map((weekday) => (
-              <span key={weekday} className="py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              <span key={weekday} className="py-1 font-mono text-[11px] uppercase text-faint">
                 {weekday}
               </span>
             ))}
@@ -182,12 +182,10 @@ export function DatePicker({
                   onClick={() => select(date)}
                   aria-label={date.toLocaleDateString("en", { dateStyle: "full" })}
                   aria-pressed={isSelected}
-                  className={`rounded-md py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:focus:ring-zinc-600 ${
+                  className={`rounded-sm py-1.5 font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
                     isSelected
-                      ? "bg-zinc-900 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-                      : `text-zinc-800 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800 ${
-                          isToday ? "ring-1 ring-zinc-300 dark:ring-zinc-600" : ""
-                        }`
+                      ? "bg-accent font-semibold text-on-accent"
+                      : `text-fg hover:bg-surface-2 ${isToday ? "ring-1 ring-inset ring-accent" : ""}`
                   }`}
                 >
                   {date.getDate()}
@@ -196,11 +194,11 @@ export function DatePicker({
             })}
           </div>
 
-          <div className="mt-2 flex justify-end border-t border-zinc-200 pt-2 dark:border-zinc-800">
+          <div className="mt-2 flex justify-end border-t border-line pt-2">
             <button
               type="button"
               onClick={() => select(new Date())}
-              className="rounded-md px-2 py-1 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-sm px-2 py-1 font-mono text-xs uppercase tracking-wider text-accent-fg hover:bg-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
             >
               Today
             </button>

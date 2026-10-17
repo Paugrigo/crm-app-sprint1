@@ -1,17 +1,23 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { MeetingLog } from "@/components/meeting-log";
+import { PageHeader } from "@/components/page-header";
+import { buttonPrimary, loadingText, pageMain } from "@/components/ui";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Meeting log
-        </h1>
-      </header>
-      <Suspense
-        fallback={<p className="text-sm text-zinc-500 dark:text-zinc-400">Loading meetings…</p>}
-      >
+    <main className={pageMain}>
+      <PageHeader
+        kicker="Ledger"
+        title="Meeting log"
+        description="Every meeting you've logged, newest first."
+        actions={
+          <Link href="/meetings/new" className={buttonPrimary}>
+            + Log a meeting
+          </Link>
+        }
+      />
+      <Suspense fallback={<p className={loadingText}>Loading meetings…</p>}>
         <MeetingLog />
       </Suspense>
     </main>

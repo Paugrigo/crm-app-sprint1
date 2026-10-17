@@ -25,7 +25,7 @@ export function DeleteButton({
       onClick={confirmDelete}
       aria-label={label}
       title={title}
-      className="relative z-10 flex items-center rounded-md border border-red-300 bg-red-50 p-1.5 text-sm font-medium text-red-700 hover:border-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-800 dark:bg-red-950 dark:text-red-300 dark:hover:border-red-600 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900"
+      className="relative z-10 flex items-center rounded-sm border border-transparent p-1.5 text-faint transition-colors hover:border-danger/40 hover:bg-danger-soft hover:text-danger focus:outline-none focus-visible:border-danger/40 focus-visible:text-danger focus-visible:ring-2 focus-visible:ring-danger/40"
     >
       <svg
         aria-hidden="true"

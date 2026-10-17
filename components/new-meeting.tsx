@@ -6,6 +6,7 @@ import { browser } from "react-dom";
 import { saveMeetings, type Meeting } from "@/lib/meetings";
 import { useMeetings } from "@/lib/use-meetings";
 import { MeetingForm } from "./meeting-form";
+import { errorBox } from "./ui";
 
 // Browser-only: saving needs localStorage, and the form's default date must be the visitor's
 // today, not the day the page was prerendered. Render inside a <Suspense> boundary.
@@ -29,10 +30,7 @@ export function NewMeeting() {
   return (
     <>
       {saveFailed && (
-        <p
-          role="alert"
-          className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
-        >
+        <p role="alert" className={`${errorBox} mb-4`}>
           Couldn&apos;t save your meeting: browser storage is unavailable or full.
         </p>
       )}

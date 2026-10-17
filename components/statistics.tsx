@@ -7,13 +7,12 @@ import { formatMeetingDate } from "@/lib/format-date";
 import { computeStatistics, daysBetween, localToday, type PersonStats } from "@/lib/statistics";
 import { useMeetings } from "@/lib/use-meetings";
 import { useTags } from "@/lib/use-tags";
+import { buttonPrimary, emptyState, label, panel, panelHeader } from "./ui";
 
 const PEOPLE_SHOWN = 5;
 
-const card = "rounded-xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950";
-const heading = "mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100";
-const muted = "text-sm text-zinc-500 dark:text-zinc-400";
-const bar = "rounded-sm bg-zinc-800 dark:bg-zinc-300";
+const muted = "text-sm text-muted";
+const bar = "rounded-[1px] bg-accent";
 
 function plural(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
@@ -30,7 +29,7 @@ export function Statistics() {
 
   const upcomingNote =
     stats.upcoming > 0 ? (
-      <p className={muted}>
+      <p className="font-mono text-xs text-faint">
         {plural(stats.upcoming, "meeting")} dated after today{" "}
         {stats.upcoming === 1 ? "isn't" : "aren't"} counted.
       </p>
@@ -39,15 +38,13 @@ export function Statistics() {
   if (stats.total === 0) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
-          <p className="font-medium text-zinc-900 dark:text-zinc-100">No statistics yet</p>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <div className={emptyState}>
+          <p className={label}>No data</p>
+          <p className="mt-2 font-medium text-fg">No statistics yet</p>
+          <p className="mt-1 text-sm text-muted">
             Statistics appear once you&apos;ve logged a meeting dated today or earlier.
           </p>
-          <Link
-            href="/meetings/new"
-            className="mt-4 inline-block rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
+          <Link href="/meetings/new" className={`${buttonPrimary} mt-4`}>
             Log a meeting
           </Link>
         </div>
@@ -59,16 +56,24 @@ export function Statistics() {
   const monthChange = stats.thisMonth - stats.lastMonth;
 
   return (
-    <div className="space-y-8">
-      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="space-y-4">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line lg:grid-cols-4">
         <StatCard label="Meetings" value={stats.total} />
         <StatCard
           label="This month"
           value={stats.thisMonth}
           detail={
-            monthChange === 0
-              ? "Same as last month"
-              : `${monthChange > 0 ? "+" : "−"}${Math.abs(monthChange)} vs last month`
+            monthChange === 0 ? (
+              "= Same as last month"
+            ) : (
+              <>
+                <span className={monthChange > 0 ? "text-up" : "text-down"}>
+                  {monthChange > 0 ? "▲ +" : "▼ −"}
+                  {Math.abs(monthChange)}
+                </span>{" "}
+                vs last month
+              </>
+            )
           }
         />
         <StatCard label="People met" value={stats.people} />
@@ -80,33 +85,29 @@ export function Statistics() {
       </dl>
       {upcomingNote}
 
-      <section className={card}>
-        <h2 className={heading}>Meetings per month</h2>
+      <Panel title="Meetings per month" meta="Last 12 months">
         <MonthChart months={stats.months} />
-      </section>
+      </Panel>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <section className={card}>
-          <h2 className={heading}>Who you meet most</h2>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Who you meet most" meta={`Top ${PEOPLE_SHOWN}`}>
           <PeopleList
             people={stats.topPeople.slice(0, PEOPLE_SHOWN)}
             describe={(p) => plural(p.meetings, "meeting")}
             detail={(p) => `Last met ${formatMeetingDate(p.lastMet)}`}
           />
-        </section>
-        <section className={card}>
-          <h2 className={heading}>Not met in a while</h2>
+        </Panel>
+        <Panel title="Not met in a while" meta={`Top ${PEOPLE_SHOWN}`}>
           <PeopleList
             people={stats.longestSinceMet.slice(0, PEOPLE_SHOWN)}
             describe={(p) => timeSince(p.lastMet, today)}
             detail={(p) => `Last met ${formatMeetingDate(p.lastMet)}`}
           />
-        </section>
+        </Panel>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <section className={card}>
-          <h2 className={heading}>Meetings by tag</h2>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Meetings by tag">
           {stats.tags.length === 0 ? (
             <p className={muted}>No tags yet.</p>
           ) : (
@@ -115,24 +116,25 @@ export function Statistics() {
                 key: tag?.id ?? "untagged",
                 label: tag ? (
                   <>
-                    <span aria-hidden="true" className="text-zinc-400 dark:text-zinc-500">
+                    <span aria-hidden="true" className="text-accent-fg">
                       #
                     </span>
                     {tag.name}
                   </>
                 ) : (
-                  <span className="italic">Untagged</span>
+                  <span className="text-faint">(untagged)</span>
                 ),
                 count,
               }))}
             />
           )}
           {stats.tags.some((t) => t.tag) && (
-            <p className={`mt-4 ${muted}`}>A meeting with several tags counts once for each.</p>
+            <p className="mt-4 font-mono text-[11px] text-faint">
+              A meeting with several tags counts once for each.
+            </p>
           )}
-        </section>
-        <section className={card}>
-          <h2 className={heading}>Day of the week</h2>
+        </Panel>
+        <Panel title="Day of the week">
           <BarList
             items={stats.weekdays.map(({ weekday, count }) => ({
               key: String(weekday),
@@ -140,20 +142,38 @@ export function Statistics() {
               count,
             }))}
           />
-        </section>
+        </Panel>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value, detail }: { label: string; value: ReactNode; detail?: string }) {
+function Panel({ title, meta, children }: { title: string; meta?: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <dt className={muted}>{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-        {value}
-      </dd>
-      {detail && <dd className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{detail}</dd>}
+    <section className={panel}>
+      <div className={panelHeader}>
+        <h2 className={label}>{title}</h2>
+        {meta && <span className="font-mono text-[11px] text-faint">{meta}</span>}
+      </div>
+      <div className="p-4">{children}</div>
+    </section>
+  );
+}
+
+function StatCard({
+  label: title,
+  value,
+  detail,
+}: {
+  label: string;
+  value: ReactNode;
+  detail?: ReactNode;
+}) {
+  return (
+    <div className="bg-surface p-4">
+      <dt className={label}>{title}</dt>
+      <dd className="mt-2 font-mono text-3xl font-semibold tracking-tight text-fg">{value}</dd>
+      {detail && <dd className="mt-1 font-mono text-[11px] text-muted">{detail}</dd>}
     </div>
   );
 }
@@ -176,17 +196,17 @@ function MonthChart({ months }: { months: { month: string; count: number }[] }) 
             {/* The top padding leaves room for the count above the tallest bar. */}
             <div aria-hidden="true" className="flex min-h-0 w-full flex-1 items-end justify-center pt-5">
               <div
-                className={`relative w-full max-w-10 ${count > 0 ? bar : "bg-zinc-200 dark:bg-zinc-800"}`}
+                className={`relative w-full max-w-10 ${count > 0 ? bar : "bg-line"}`}
                 style={{ height: count > 0 ? `${(count / max) * 100}%` : "2px" }}
               >
                 {count > 0 && (
-                  <span className="absolute inset-x-0 -top-5 text-center text-xs tabular-nums text-zinc-600 dark:text-zinc-400">
+                  <span className="absolute inset-x-0 -top-5 text-center font-mono text-[11px] text-muted">
                     {count}
                   </span>
                 )}
               </div>
             </div>
-            <span aria-hidden="true" className="mt-2 h-8 text-center text-xs leading-4 text-zinc-500 dark:text-zinc-400">
+            <span aria-hidden="true" className="mt-2 h-8 border-t border-line pt-1 text-center font-mono text-[10px] uppercase leading-4 text-faint">
               {short}
               {showYear && <span className="block">{date.getFullYear()}</span>}
             </span>
@@ -200,16 +220,16 @@ function MonthChart({ months }: { months: { month: string; count: number }[] }) 
 function BarList({ items }: { items: { key: string; label: ReactNode; count: number }[] }) {
   const max = Math.max(1, ...items.map((item) => item.count));
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-2.5">
       {items.map(({ key, label, count }) => (
         <li key={key}>
           <div className="mb-1 flex items-baseline justify-between gap-4 text-sm">
-            <span className="min-w-0 truncate font-medium text-zinc-800 dark:text-zinc-200">
+            <span className="min-w-0 truncate font-mono text-xs text-fg">
               {label}
             </span>
-            <span className="shrink-0 tabular-nums text-zinc-600 dark:text-zinc-400">{count}</span>
+            <span className="shrink-0 font-mono text-xs text-muted">{count}</span>
           </div>
-          <div aria-hidden="true" className="h-2 rounded-sm bg-zinc-200 dark:bg-zinc-800">
+          <div aria-hidden="true" className="h-1.5 rounded-[1px] bg-surface-2">
             <div className={`h-full ${bar}`} style={{ width: `${(count / max) * 100}%` }} />
           </div>
         </li>
@@ -231,19 +251,19 @@ function PeopleList({
     return <p className={muted}>No participants recorded yet.</p>;
   }
   return (
-    <ol className="divide-y divide-zinc-200 dark:divide-zinc-800">
+    <ol className="-my-1 divide-y divide-line">
       {people.map((person) => (
         <li
           key={person.name.toLowerCase()}
-          className="flex items-baseline justify-between gap-4 py-2 first:pt-0 last:pb-0"
+          className="flex items-baseline justify-between gap-4 py-2"
         >
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+            <p className="truncate text-sm font-medium text-fg">
               {person.name}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">{detail(person)}</p>
+            <p className="font-mono text-[11px] text-faint">{detail(person)}</p>
           </div>
-          <span className="shrink-0 text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
+          <span className="shrink-0 font-mono text-xs text-accent-fg">
             {describe(person)}
           </span>
         </li>

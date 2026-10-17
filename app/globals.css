@@ -3,6 +3,7 @@
 /*
  * Dark mode: forced by data-theme="dark" on <html>, or following the OS unless
  * data-theme="light" forces light. No data-theme means "system" (see lib/theme.ts).
+ * Prefer the color tokens below over dark: classes; they already switch with the theme.
  */
 @custom-variant dark {
   &:where([data-theme="dark"], [data-theme="dark"] *) {
@@ -15,36 +16,111 @@
   }
 }
 
+/*
+ * Color tokens ("finance terminal" palette). Light values here; dark values below, under both
+ * the forced and the OS-following selectors. Use them as Tailwind colors: bg-surface,
+ * text-muted, border-line, bg-accent, text-accent-fg, ...
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #eef0f3;
+  --line: #e1e4e9;
+  --line-strong: #c9ced6;
+  --fg: #0f1419;
+  --muted: #5b6470;
+  --faint: #8a929c;
+  /* Amber fill (buttons, bars) with dark text on it; accent-fg is amber for text on bg. */
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --on-accent: #0b0d10;
+  --accent-fg: #b45309;
+  --accent-soft: rgb(245 158 11 / 0.14);
+  --up: #15803d;
+  --down: #b91c1c;
+  --danger: #b91c1c;
+  --danger-soft: rgb(220 38 38 / 0.08);
   /* Lets native controls (scrollbars, inputs) match the theme. */
   color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 :root[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --bg: #0b0d10;
+  --surface: #11151a;
+  --surface-2: #171c22;
+  --line: #222931;
+  --line-strong: #333c46;
+  --fg: #e6e8eb;
+  --muted: #8b949e;
+  --faint: #5c6570;
+  --accent-fg: #fbbf24;
+  --accent-soft: rgb(245 158 11 / 0.12);
+  --up: #22c55e;
+  --down: #f87171;
+  --danger: #f87171;
+  --danger-soft: rgb(248 113 113 / 0.12);
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0b0d10;
+    --surface: #11151a;
+    --surface-2: #171c22;
+    --line: #222931;
+    --line-strong: #333c46;
+    --fg: #e6e8eb;
+    --muted: #8b949e;
+    --faint: #5c6570;
+    --accent-fg: #fbbf24;
+    --accent-soft: rgb(245 158 11 / 0.12);
+    --up: #22c55e;
+    --down: #f87171;
+    --danger: #f87171;
+    --danger-soft: rgb(248 113 113 / 0.12);
     color-scheme: dark;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Numbers in mono text line up in columns. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--fg);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
 }

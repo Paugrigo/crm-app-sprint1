@@ -67,6 +67,7 @@ Users can log new meetings, add participants and tags to them, and edit or delet
 
 - **No backend.** No API routes, server databases, or external services. All data lives client-side.
 - **No user accounts.** No authentication or per-user data.
+- **Never commit on your own.** Only commit (and push or open a PR) when the user explicitly asks for it. Approving a plan that mentions committing doesn't count. When work is done, leave the changes uncommitted and say they're ready to commit.
 - **No new libraries without asking first.** This includes runtime dependencies and dev dependencies. Propose the library and the reason, then wait for approval before installing.
 
 ## Data storage
@@ -84,7 +85,10 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 
 ## Theming
 
-- Use Tailwind's `dark:` variant for dark styles. It's a custom variant (`app/globals.css`): dark applies when `<html data-theme="dark">`, or when the OS prefers dark and `data-theme` isn't `"light"`. No `data-theme` means "System".
+- **Look:** "finance terminal": near-black (dark) or cool gray (light) surfaces, 1px hairline borders, small radii, compact rows, and an amber accent for primary buttons, the active menu item, and chart bars. Geist Mono for data and labels (dates, numbers, counts, tags, small uppercase section labels); Geist Sans for names, notes, and headings.
+- **Colors are semantic tokens** defined in `app/globals.css` (`bg`, `surface`, `surface-2`, `line`, `line-strong`, `fg`, `muted`, `faint`, `accent`, `accent-hover`, `on-accent`, `accent-fg`, `accent-soft`, `up`, `down`, `danger`, `danger-soft`), used as Tailwind colors (`bg-surface`, `text-muted`, `border-line`, ...). They switch with the theme, so components need no `dark:` classes. Don't use raw palette colors like `zinc-*`. Use `accent` for amber fills (with `text-on-accent`) and `accent-fg` for amber text.
+- **Shared class strings** live in `components/ui.ts` (`pageMain`, `buttonPrimary`, `buttonSecondary`, `buttonGhost`, `iconButton`, `input`, `panel`, `panelHeader`, `label`, `emptyState`, `textLink`, `errorBox`, `loadingText`). Reuse them instead of copying class lists. Pages use `<PageHeader>` (`components/page-header.tsx`).
+- The `dark:` variant still exists for rare exceptions (e.g. a stronger shadow in dark). It's a custom variant (`app/globals.css`): dark applies when `<html data-theme="dark">`, or when the OS prefers dark and `data-theme` isn't `"light"`. No `data-theme` means "System".
 - Never set `data-theme` directly; call `saveThemePreference()` from `lib/theme.ts`.
 
 ## Commands
@@ -95,7 +99,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 
 ## Project structure
 
-- `app/`: App Router pages and layouts (`layout.tsx`, `page.tsx`, `not-found.tsx`, `globals.css`)
+- `app/`: App Router pages and layouts (`layout.tsx`, `page.tsx`, `not-found.tsx`, `globals.css` with the theme's color tokens)
   - `meetings/new/page.tsx`: log a meeting page
   - `tags/page.tsx`: tags page
   - `statistics/page.tsx`: statistics page
@@ -115,6 +119,8 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
   - `meeting-tags.tsx`: a meeting's tags as small `#name` labels
   - `settings.tsx`: client component for `/settings` (theme switch, backup export/import); browser-only, same rule
   - `inline-script.tsx`: runs a script before hydration on full page loads (used for the theme, so there's no flash of the wrong colors)
+  - `ui.ts`: shared Tailwind class strings (buttons, inputs, panels, labels); see Theming
+  - `page-header.tsx`: page title row (mono kicker, title, description, actions)
   - `sidebar.tsx`: app menu in the root layout, with "Log a meeting" as a primary button at the top; the part using `usePathname()` and localStorage is inside `<Suspense>` (with Cache Components, `usePathname()` suspends on `/meetings/[id]`), and the fallback shows plain links
 - `lib/meetings.ts`: `Meeting` type, localStorage read/save, and change subscription
 - `lib/use-meetings.ts`: `useMeetings()` hook for reading meetings in components
