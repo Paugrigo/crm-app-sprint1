@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatMeetingDate } from "@/lib/format-date";
 import type { Meeting } from "@/lib/meetings";
 import { DeleteMeetingButton } from "./delete-meeting-button";
+import { MeetingTags } from "./meeting-tags";
 
 export function MeetingList({
   meetings,
@@ -65,6 +66,7 @@ export function MeetingList({
               {meeting.notes}
             </p>
           )}
+          <MeetingTags tagIds={meeting.tagIds} className="mt-3" />
         </li>
       ))}
     </ul>

@@ -2,14 +2,12 @@
 
 import { use, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
 import { browser } from "react-dom";
-import {
-  meetingsFromBackup,
-  meetingsToBackup,
-  saveMeetings,
-  type Meeting,
-} from "@/lib/meetings";
+import { fromBackup, mergeBackup, toBackup } from "@/lib/backup";
+import { saveMeetings } from "@/lib/meetings";
+import { saveTags } from "@/lib/tags";
 import { saveThemePreference, type ThemePreference } from "@/lib/theme";
 import { useMeetings } from "@/lib/use-meetings";
+import { useTags } from "@/lib/use-tags";
 import { useThemePreference } from "@/lib/use-theme";
 
 const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -19,6 +17,10 @@ const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
 ];
 
 type Status = { kind: "success" | "error"; text: string };
+
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
 
 const sectionClass =
   "rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900";
@@ -82,6 +84,7 @@ function AppearanceSettings() {
 
 function BackupSettings() {
   const meetings = useMeetings();
+  const tags = useTags();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<Status | null>(null);
 
@@ -90,7 +93,7 @@ function BackupSettings() {
   useLayoutEffect(() => () => setStatus(null), []);
 
   function exportMeetings() {
-    const blob = new Blob([meetingsToBackup(meetings)], { type: "application/json" });
+    const blob = new Blob([toBackup({ meetings, tags })], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -99,7 +102,7 @@ function BackupSettings() {
     URL.revokeObjectURL(url);
     setStatus({
       kind: "success",
-      text: `Downloaded a backup of ${meetings.length} ${meetings.length === 1 ? "meeting" : "meetings"}.`,
+      text: `Downloaded a backup of ${plural(meetings.length, "meeting")} and ${plural(tags.length, "tag")}.`,
     });
   }
 
@@ -109,37 +112,30 @@ function BackupSettings() {
     event.target.value = "";
     if (!file) return;
 
-    const imported = meetingsFromBackup(await file.text());
+    const imported = fromBackup(await file.text());
     if (imported === null) {
       setStatus({ kind: "error", text: `"${file.name}" isn't a meetings backup file.` });
       return;
     }
-    if (imported.length === 0) {
-      setStatus({ kind: "error", text: `"${file.name}" doesn't contain any meetings.` });
+    if (imported.meetings.length === 0 && imported.tags.length === 0) {
+      setStatus({ kind: "error", text: `"${file.name}" doesn't contain any meetings or tags.` });
       return;
     }
 
-    const existingIds = new Set(meetings.map((m) => m.id));
-    const updatedCount = imported.filter((m) => existingIds.has(m.id)).length;
-    const newCount = imported.length - updatedCount;
+    const merged = mergeBackup({ meetings, tags }, imported);
     const question =
-      `Import ${imported.length} ${imported.length === 1 ? "meeting" : "meetings"}?` +
-      (updatedCount > 0
-        ? ` ${updatedCount} already ${updatedCount === 1 ? "exists" : "exist"} here and will be replaced by the version in the file.`
+      `Import ${plural(imported.meetings.length, "meeting")} and ${plural(imported.tags.length, "tag")}?` +
+      (merged.updatedMeetings > 0
+        ? ` ${plural(merged.updatedMeetings, "meeting")} already ${merged.updatedMeetings === 1 ? "exists" : "exist"} here and will be replaced by the version in the file.`
         : "") +
-      " Your other meetings are kept.";
+      " Everything else you have is kept.";
     if (!window.confirm(question)) return;
 
-    // Imported meetings replace ones with the same ID; everything else is kept.
-    const importedById = new Map(imported.map((m) => [m.id, m]));
-    const merged: Meeting[] = [
-      ...meetings.map((m) => importedById.get(m.id) ?? m),
-      ...imported.filter((m) => !existingIds.has(m.id)),
-    ];
-    if (saveMeetings(merged)) {
+    // Save tags first, so imported meetings never point at tags that weren't saved.
+    if (saveTags(merged.tags) && saveMeetings(merged.meetings)) {
       setStatus({
         kind: "success",
-        text: `Imported ${imported.length} ${imported.length === 1 ? "meeting" : "meetings"} (${newCount} new, ${updatedCount} updated).`,
+        text: `Imported ${plural(merged.newMeetings, "new meeting")}, updated ${merged.updatedMeetings}, and added ${plural(merged.newTags, "new tag")}.`,
       });
     } else {
       setStatus({
@@ -153,8 +149,8 @@ function BackupSettings() {
     <section className={sectionClass}>
       <h2 className={headingClass}>Backup</h2>
       <p className={descriptionClass}>
-        Meetings are saved only in this browser. Download a backup to keep them safe or move
-        them to another browser or device, then import it there.
+        Meetings and tags are saved only in this browser. Download a backup to keep them safe
+        or move them to another browser or device, then import it there.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button

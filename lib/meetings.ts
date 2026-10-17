@@ -8,28 +8,52 @@ export type Meeting = {
   date: string;
   participants: string[];
   notes: string;
+  /** IDs of the meeting's tags (see lib/tags.ts). May include IDs of tags that no longer exist. */
+  tagIds: string[];
 };
 
 const STORAGE_KEY = "crm.meetings.v1";
 
-function isMeeting(value: unknown): value is Meeting {
-  if (typeof value !== "object" || value === null) return false;
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+/**
+ * Returns the value as a Meeting, or null if it isn't one. Meetings saved before tags
+ * existed have no tagIds; they get an empty list, so no storage migration is needed.
+ */
+export function toMeeting(value: unknown): Meeting | null {
+  if (typeof value !== "object" || value === null) return null;
   const m = value as Record<string, unknown>;
-  return (
-    typeof m.id === "string" &&
-    typeof m.name === "string" &&
-    typeof m.date === "string" &&
-    Array.isArray(m.participants) &&
-    m.participants.every((p) => typeof p === "string") &&
-    typeof m.notes === "string"
-  );
+  if (
+    typeof m.id !== "string" ||
+    typeof m.name !== "string" ||
+    typeof m.date !== "string" ||
+    !isStringArray(m.participants) ||
+    typeof m.notes !== "string"
+  ) {
+    return null;
+  }
+  return {
+    id: m.id,
+    name: m.name,
+    date: m.date,
+    participants: m.participants,
+    notes: m.notes,
+    tagIds: isStringArray(m.tagIds) ? m.tagIds : [],
+  };
+}
+
+/** Valid meetings from a parsed JSON array, skipping anything that isn't one. */
+export function toMeetings(values: unknown[]): Meeting[] {
+  return values.map(toMeeting).filter((m): m is Meeting => m !== null);
 }
 
 function parseMeetings(raw: string | null): Meeting[] {
   if (raw === null) return [];
   try {
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter(isMeeting) : [];
+    return Array.isArray(parsed) ? toMeetings(parsed) : [];
   } catch {
     return [];
   }
@@ -90,37 +114,6 @@ export function saveMeetings(meetings: Meeting[]): boolean {
   }
   listeners.forEach((listener) => listener());
   return true;
-}
-
-// Backups: a JSON file the user downloads and can import later, e.g. in another browser.
-
-const BACKUP_FORMAT = "crm-meetings-backup";
-
-/** The contents of a backup file for these meetings. */
-export function meetingsToBackup(meetings: Meeting[]): string {
-  return JSON.stringify(
-    { format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(), meetings },
-    null,
-    2,
-  );
-}
-
-/**
- * Reads meetings from a backup file. Also accepts a bare array of meetings (the raw
- * localStorage format). Returns null if the file isn't a backup; skips invalid entries.
- */
-export function meetingsFromBackup(text: string): Meeting[] | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  const list =
-    typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>).meetings
-      : parsed;
-  return Array.isArray(list) ? list.filter(isMeeting) : null;
 }
 
 /**
