@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { TagsManager } from "@/components/tags-manager";
-import { loadingText, pageMain } from "@/components/ui";
+import { loadingText, pageMainNarrow } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Tags · Meeting log",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function TagsPage() {
   return (
-    <main className={pageMain}>
+    <main className={pageMainNarrow}>
       <PageHeader
         kicker="Taxonomy"
         title="Tags"

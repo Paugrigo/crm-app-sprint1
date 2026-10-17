@@ -4,6 +4,9 @@
 /** Page width and padding, for each page's <main>. */
 export const pageMain = "mx-auto w-full max-w-5xl px-4 py-8 sm:px-6";
 
+/** Narrower page for single-column forms and lists (log a meeting, tags, settings). */
+export const pageMainNarrow = "mx-auto w-full max-w-3xl px-4 py-8 sm:px-6";
+
 const focusRing =
   "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-1 focus-visible:ring-offset-bg";
 

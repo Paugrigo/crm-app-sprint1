@@ -34,7 +34,7 @@ export function Settings() {
   use(browser("Settings are stored in localStorage."));
 
   return (
-    <div className="max-w-3xl space-y-4">
+    <div className="space-y-4">
       <AppearanceSettings />
       <BackupSettings />
     </div>

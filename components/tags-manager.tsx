@@ -101,7 +101,7 @@ export function TagsManager() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <section className={panel}>
         <div className={panelHeader}>
           <h2 className={label}>Create a tag</h2>
