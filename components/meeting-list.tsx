@@ -15,8 +15,14 @@ export function MeetingList({
       <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
         <p className="font-medium text-zinc-900 dark:text-zinc-100">No meetings logged yet</p>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Use the form above to log your first meeting. It will show up here.
+          Log your first meeting and it will show up here.
         </p>
+        <Link
+          href="/meetings/new"
+          className="mt-4 inline-block rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          Log a meeting
+        </Link>
       </div>
     );
   }

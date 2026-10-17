@@ -8,9 +8,6 @@ export default function Home() {
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
           Meeting log
         </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Record who you met, when, and what was discussed.
-        </p>
       </header>
       <Suspense
         fallback={<p className="text-sm text-zinc-500 dark:text-zinc-400">Loading meetings…</p>}
