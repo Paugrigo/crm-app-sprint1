@@ -21,14 +21,14 @@ Each meeting has:
 - **Participants**: one or more people who attended
 - **Notes**: free-form notes about the meeting
 
-Users can log new meetings and add participants to them.
+Users can log new meetings, add participants to them, and edit or delete them.
 
 ### Status
 
 - **Done:** meeting log page (`/`): a form to log a meeting (name, date, participants, notes) and a list of logged meetings, newest first. Each list item links to its meeting page.
 - **Done:** meeting page (`/meetings/[id]`): one bookmarkable page per meeting showing all its details. The browser tab title is the meeting name. Unknown IDs show a "Meeting not found" message.
 - **Done:** deleting a meeting (trash-icon button on list items and on the meeting page, with a confirmation prompt). Deleting from the meeting page returns to `/`.
-- **Not yet built:** editing meetings.
+- **Done:** editing a meeting (Edit button on the meeting page swaps the details for the meeting form, prefilled; Save changes or Cancel). Unsaved edits are dropped when navigating away.
 
 ### Routes
 
@@ -73,8 +73,8 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
   - `meetings/[id]/page.tsx`: meeting page; reads `params` inside `<Suspense>` (required with Cache Components, since IDs are only known at runtime)
 - `components/`: UI components
   - `meeting-log.tsx`: client component for `/` that owns meeting state and persistence; browser-only via `use(browser())`, so render it inside `<Suspense>`
-  - `meeting-detail.tsx`: client component for `/meetings/[id]`; browser-only, same rule
-  - `meeting-form.tsx`: form for logging a meeting
+  - `meeting-detail.tsx`: client component for `/meetings/[id]` (view, edit, delete); browser-only, same rule
+  - `meeting-form.tsx`: form for logging a meeting; pass `initial` (plus `submitLabel`, `onCancel`) to edit an existing one
   - `date-picker.tsx`: date input with a custom calendar popover that follows the light/dark theme (the browser's native picker popup can't be styled)
   - `meeting-list.tsx`: list of logged meetings, each linking to its page
   - `delete-meeting-button.tsx`: trash-icon button with a confirmation prompt

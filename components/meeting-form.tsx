@@ -18,12 +18,26 @@ const inputClass =
 
 const labelClass = "mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
 
-export function MeetingForm({ onSubmit }: { onSubmit: (draft: MeetingDraft) => void }) {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState(todayAsDateInputValue);
-  const [participants, setParticipants] = useState<string[]>([]);
+/**
+ * Form for logging a meeting. Pass `initial` to edit an existing meeting instead: the
+ * fields start with its values and aren't cleared after saving.
+ */
+export function MeetingForm({
+  onSubmit,
+  initial,
+  submitLabel = "Log meeting",
+  onCancel,
+}: {
+  onSubmit: (draft: MeetingDraft) => void;
+  initial?: MeetingDraft;
+  submitLabel?: string;
+  onCancel?: () => void;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [date, setDate] = useState(initial?.date ?? todayAsDateInputValue);
+  const [participants, setParticipants] = useState<string[]>(initial?.participants ?? []);
   const [participantInput, setParticipantInput] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
 
   function addParticipant() {
     const participant = participantInput.trim();
@@ -57,6 +71,7 @@ export function MeetingForm({ onSubmit }: { onSubmit: (draft: MeetingDraft) => v
         : participants;
 
     onSubmit({ name: name.trim(), date, participants: allParticipants, notes: notes.trim() });
+    if (initial) return;
 
     setName("");
     setDate(todayAsDateInputValue());
@@ -154,12 +169,23 @@ export function MeetingForm({ onSubmit }: { onSubmit: (draft: MeetingDraft) => v
         />
       </div>
 
-      <button
-        type="submit"
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
-        Log meeting
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {submitLabel}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }
