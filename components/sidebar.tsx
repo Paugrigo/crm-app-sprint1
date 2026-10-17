@@ -8,13 +8,16 @@ import { formatMeetingDate } from "@/lib/format-date";
 import { requestPersistentStorage } from "@/lib/meetings";
 import { subscribeToTheme } from "@/lib/theme";
 import { useMeetings } from "@/lib/use-meetings";
+import { buttonPrimary, buttonSecondary, label } from "./ui";
 
 const RECENT_LIMIT = 8;
 
-const linkBase = "block rounded-md px-3 py-2 text-sm font-medium";
-const linkIdle =
-  "text-zinc-700 hover:bg-zinc-200/60 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100";
-const linkActive = "bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100";
+// The active item gets a soft amber background and a 2px amber bar on its left edge.
+const linkBase =
+  "relative flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60";
+const linkIdle = "text-muted hover:bg-surface-2 hover:text-fg";
+const linkActive =
+  "bg-accent-soft font-medium text-fg before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full before:bg-accent";
 
 /**
  * App menu: a left sidebar on wider screens, a top bar with a Menu toggle on phones.
@@ -33,13 +36,14 @@ export function Sidebar() {
   useEffect(() => subscribeToTheme(() => {}), []);
 
   return (
-    <aside className="border-b border-zinc-200 bg-zinc-50 md:sticky md:flex md:flex-col md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="flex items-center justify-between px-4 py-4 md:px-5 md:py-6">
+    <aside className="border-b border-line bg-surface md:sticky md:flex md:flex-col md:top-0 md:h-screen md:w-60 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r">
+      <div className="flex items-center justify-between border-line px-4 py-3 md:border-b md:py-4">
         <Link
           href="/"
           onClick={close}
-          className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
+          className="flex items-center gap-2 rounded-sm font-mono text-sm font-semibold uppercase tracking-widest text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
         >
+          <span aria-hidden="true" className="size-2.5 rounded-[2px] bg-accent" />
           Meeting log
         </Link>
         <button
@@ -47,7 +51,7 @@ export function Sidebar() {
           onClick={() => setOpen(!open)}
           aria-expanded={open}
           aria-controls="app-menu"
-          className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 md:hidden dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className={`${buttonSecondary} md:hidden`}
         >
           {open ? "Close" : "Menu"}
         </button>
@@ -56,7 +60,7 @@ export function Sidebar() {
       <nav
         id="app-menu"
         aria-label="Main"
-        className={`${open ? "flex" : "hidden"} flex-col px-3 pb-4 md:flex md:flex-1 md:pb-6`}
+        className={`${open ? "flex" : "hidden"} flex-col px-3 pb-4 md:flex md:flex-1 md:pt-4 md:pb-4`}
       >
         {/* The active link depends on the URL, and recent meetings on localStorage; neither
             is known while prerendering, so show plain links until the browser takes over. */}
@@ -96,12 +100,12 @@ function SettingsLink({
 }) {
   const active = pathname === "/settings";
   return (
-    <div className="mt-6 border-t border-zinc-200 pt-3 md:mt-auto dark:border-zinc-800">
+    <div className="mt-6 border-t border-line pt-3 md:mt-auto">
       <Link
         href="/settings"
         onClick={onNavigate}
         aria-current={active ? "page" : undefined}
-        className={`flex items-center gap-2 ${linkBase} ${active ? linkActive : linkIdle}`}
+        className={`${linkBase} ${active ? linkActive : linkIdle}`}
       >
         <svg
           aria-hidden="true"
@@ -137,7 +141,7 @@ function MainLinks({
         href="/meetings/new"
         onClick={onNavigate}
         aria-current={pathname === "/meetings/new" ? "page" : undefined}
-        className="mb-4 flex items-center justify-center gap-2 rounded-md bg-zinc-900 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 aria-[current=page]:ring-2 aria-[current=page]:ring-zinc-400 aria-[current=page]:ring-offset-2 aria-[current=page]:ring-offset-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 dark:focus-visible:ring-zinc-500 dark:focus-visible:ring-offset-zinc-950 dark:aria-[current=page]:ring-zinc-500 dark:aria-[current=page]:ring-offset-zinc-950"
+        className={`${buttonPrimary} mb-5 w-full py-2 font-semibold aria-[current=page]:ring-2 aria-[current=page]:ring-accent/50 aria-[current=page]:ring-offset-2 aria-[current=page]:ring-offset-surface`}
       >
         <svg
           aria-hidden="true"
@@ -152,7 +156,8 @@ function MainLinks({
         </svg>
         Log a meeting
       </Link>
-      <ul className="space-y-1">
+      <h2 className={`mb-1.5 px-3 ${label}`}>Navigate</h2>
+      <ul className="space-y-0.5">
         <li>
           <Link
             href="/"
@@ -197,13 +202,11 @@ function RecentMeetings({ pathname, onNavigate }: { pathname: string; onNavigate
 
   return (
     <div className="mt-6">
-      <h2 className="px-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        Recent meetings
-      </h2>
+      <h2 className={`px-3 ${label}`}>Recent</h2>
       {recent.length === 0 ? (
-        <p className="mt-2 px-3 text-sm text-zinc-500 dark:text-zinc-400">None yet.</p>
+        <p className="mt-1.5 px-3 text-sm text-faint">None yet.</p>
       ) : (
-        <ul className="mt-2 space-y-1">
+        <ul className="mt-1.5 space-y-0.5">
           {recent.map((meeting) => {
             const href = `/meetings/${meeting.id}`;
             const active = pathname === href;
@@ -213,12 +216,16 @@ function RecentMeetings({ pathname, onNavigate }: { pathname: string; onNavigate
                   href={href}
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
-                  className={`block rounded-md px-3 py-2 ${active ? linkActive : linkIdle}`}
+                  className={`${linkBase} ${active ? linkActive : linkIdle}`}
                 >
-                  <span className="block truncate text-sm font-medium">{meeting.name}</span>
-                  <span className="block text-xs font-normal text-zinc-500 dark:text-zinc-400">
-                    {formatMeetingDate(meeting.date)}
-                  </span>
+                  <span className="min-w-0 flex-1 truncate">{meeting.name}</span>
+                  <time
+                    dateTime={meeting.date}
+                    title={formatMeetingDate(meeting.date)}
+                    className="shrink-0 font-mono text-[11px] font-normal text-faint"
+                  >
+                    {meeting.date.slice(5)}
+                  </time>
                 </Link>
               </li>
             );
@@ -229,7 +236,7 @@ function RecentMeetings({ pathname, onNavigate }: { pathname: string; onNavigate
         <Link
           href="/"
           onClick={onNavigate}
-          className="mt-2 block px-3 text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="mt-2 block px-3 font-mono text-xs text-muted hover:text-accent-fg"
         >
           View all {meetings.length} →
         </Link>

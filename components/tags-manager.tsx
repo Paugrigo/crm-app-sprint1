@@ -7,6 +7,16 @@ import { saveTags, sameTagName, sortTags, TAG_NAME_MAX_LENGTH, type Tag } from "
 import { useMeetings } from "@/lib/use-meetings";
 import { useTags } from "@/lib/use-tags";
 import { DeleteButton } from "./delete-button";
+import {
+  buttonPrimary,
+  buttonSecondary,
+  emptyState,
+  iconButton,
+  input,
+  label,
+  panel,
+  panelHeader,
+} from "./ui";
 
 type Status = { kind: "success" | "error"; text: string };
 
@@ -91,16 +101,13 @@ export function TagsManager() {
   }
 
   return (
-    <div className="space-y-10">
-      <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          Create a tag
-        </h2>
-        <form onSubmit={createTag}>
-          <label
-            htmlFor="tag-name"
-            className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-          >
+    <div className="max-w-3xl space-y-6">
+      <section className={panel}>
+        <div className={panelHeader}>
+          <h2 className={label}>Create a tag</h2>
+        </div>
+        <form onSubmit={createTag} className="p-4">
+          <label htmlFor="tag-name" className={`mb-1.5 block ${label}`}>
             Tag name
           </label>
           <div className="flex gap-2">
@@ -115,49 +122,50 @@ export function TagsManager() {
                 setStatus(null);
               }}
               placeholder="e.g. Sales, Follow-up, Acme"
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-800"
+              className={input}
             />
             <button
               type="submit"
               disabled={!name.trim()}
-              className="shrink-0 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 dark:disabled:hover:bg-zinc-100"
+              className={`${buttonPrimary} shrink-0 px-4`}
             >
               Create tag
             </button>
           </div>
+          {status && (
+            <p
+              role={status.kind === "error" ? "alert" : "status"}
+              className={`mt-3 font-mono text-xs ${
+                status.kind === "error" ? "text-danger" : "text-up"
+              }`}
+            >
+              {status.kind === "error" ? "✕ " : "✓ "}
+              {status.text}
+            </p>
+          )}
         </form>
-        {status && (
-          <p
-            role={status.kind === "error" ? "alert" : "status"}
-            className={`mt-3 text-sm ${
-              status.kind === "error"
-                ? "text-red-700 dark:text-red-300"
-                : "text-green-700 dark:text-green-400"
-            }`}
-          >
-            {status.text}
-          </p>
-        )}
       </section>
 
-      <section>
-        <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          All tags <span className="font-normal text-zinc-500">({tags.length})</span>
-        </h2>
+      <section className={`${panel} overflow-hidden`}>
+        <div className={panelHeader}>
+          <h2 className={label}>All tags</h2>
+          <span className="font-mono text-xs text-muted">{tags.length} total</span>
+        </div>
         {tags.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
-            <p className="font-medium text-zinc-900 dark:text-zinc-100">No tags yet</p>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className={`${emptyState} m-4`}>
+            <p className={label}>No data</p>
+            <p className="mt-2 font-medium text-fg">No tags yet</p>
+            <p className="mt-1 text-sm text-muted">
               Create your first tag above, then add it to meetings when you log or edit them.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+          <ul className="divide-y divide-line">
             {sortTags(tags).map((tag) => {
               const count = meetingCount(tag.id);
               if (tag.id === editingId) {
                 return (
-                  <li key={tag.id} className="px-4 py-3">
+                  <li key={tag.id} className="bg-surface-2 px-4 py-2.5">
                     <RenameTagForm
                       tag={tag}
                       onRename={(newName) => renameTag(tag, newName)}
@@ -167,15 +175,18 @@ export function TagsManager() {
                 );
               }
               return (
-                <li key={tag.id} className="flex items-center justify-between gap-4 px-4 py-3">
-                  <span className="min-w-0 break-words font-medium text-zinc-900 dark:text-zinc-100">
-                    <span aria-hidden="true" className="text-zinc-400 dark:text-zinc-500">
+                <li
+                  key={tag.id}
+                  className="flex items-center justify-between gap-4 px-4 py-2 transition-colors hover:bg-surface-2"
+                >
+                  <span className="min-w-0 break-words font-mono text-sm text-fg">
+                    <span aria-hidden="true" className="text-accent-fg">
                       #
                     </span>
                     {tag.name}
                   </span>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className="mr-1 text-sm text-zinc-500 dark:text-zinc-400">
+                  <div className="flex shrink-0 items-center gap-1">
+                    <span className="mr-2 font-mono text-xs text-muted">
                       {count === 0
                         ? "Not used yet"
                         : `${count} ${count === 1 ? "meeting" : "meetings"}`}
@@ -188,7 +199,7 @@ export function TagsManager() {
                       }}
                       aria-label={`Rename tag ${tag.name}`}
                       title="Rename tag"
-                      className="flex items-center rounded-md border border-zinc-300 p-1.5 text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus:ring-zinc-800"
+                      className={iconButton}
                     >
                       <svg
                         aria-hidden="true"
@@ -267,24 +278,21 @@ function RenameTagForm({
           onKeyDown={handleKeyDown}
           aria-invalid={error !== null}
           aria-describedby={error ? `${inputId}-error` : undefined}
-          className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-800"
+          className={`${input} min-w-0 flex-1 py-1.5 font-mono`}
         />
-        <button
-          type="submit"
-          className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <button type="submit" className={buttonPrimary}>
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className={buttonSecondary}
         >
           Cancel
         </button>
       </div>
       {error && (
-        <p id={`${inputId}-error`} role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">
+        <p id={`${inputId}-error`} role="alert" className="mt-2 font-mono text-xs text-danger">
           {error}
         </p>
       )}

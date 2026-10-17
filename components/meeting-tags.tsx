@@ -20,18 +20,18 @@ export function MeetingTags({
 
   if (tags.length === 0) {
     return emptyMessage ? (
-      <p className={`text-sm text-zinc-500 dark:text-zinc-400 ${className}`}>{emptyMessage}</p>
+      <p className={`text-sm text-faint ${className}`}>{emptyMessage}</p>
     ) : null;
   }
 
   return (
-    <ul className={`flex flex-wrap gap-1.5 ${className}`} aria-label="Tags">
+    <ul className={`flex flex-wrap gap-1 ${className}`} aria-label="Tags">
       {tags.map((tag) => (
         <li
           key={tag.id}
-          className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300"
+          className="rounded-sm border border-line bg-surface-2 px-1.5 py-px font-mono text-[11px] text-muted"
         >
-          <span aria-hidden="true" className="text-zinc-400 dark:text-zinc-500">
+          <span aria-hidden="true" className="text-accent-fg">
             #
           </span>
           {tag.name}

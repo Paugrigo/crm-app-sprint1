@@ -1,22 +1,21 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { MeetingDetail } from "@/components/meeting-detail";
+import { loadingText, pageMain } from "@/components/ui";
 
 export default function MeetingPage({ params }: PageProps<"/meetings/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
-      <nav className="mb-6">
+    <main className={pageMain}>
+      <nav className="mb-4">
         <Link
           href="/"
-          className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="font-mono text-xs uppercase tracking-wider text-muted hover:text-accent-fg"
         >
           ← All meetings
         </Link>
       </nav>
       {/* Meeting IDs are only known at runtime, so params are read inside Suspense. */}
-      <Suspense
-        fallback={<p className="text-sm text-zinc-500 dark:text-zinc-400">Loading meeting…</p>}
-      >
+      <Suspense fallback={<p className={loadingText}>Loading meeting…</p>}>
         {params.then(({ id }) => (
           <MeetingDetail id={id} />
         ))}

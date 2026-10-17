@@ -6,6 +6,7 @@ import type { Meeting } from "@/lib/meetings";
 import { sortTags } from "@/lib/tags";
 import { useTags } from "@/lib/use-tags";
 import { DatePicker } from "./date-picker";
+import { buttonPrimary, buttonSecondary, input, label, textLink } from "./ui";
 
 type MeetingDraft = Omit<Meeting, "id">;
 
@@ -16,10 +17,7 @@ function todayAsDateInputValue(): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-800";
-
-const labelClass = "mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
+const labelClass = `mb-1.5 block ${label}`;
 
 /**
  * Form for logging a meeting. Pass `initial` to edit an existing meeting instead: the
@@ -113,7 +111,7 @@ export function MeetingForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Quarterly review with Acme"
-            className={inputClass}
+            className={input}
           />
         </div>
         <div>
@@ -125,7 +123,7 @@ export function MeetingForm({
             required
             value={date}
             onChange={setDate}
-            className={inputClass}
+            className={`${input} font-mono`}
           />
         </div>
       </div>
@@ -142,29 +140,29 @@ export function MeetingForm({
             onChange={(e) => setParticipantInput(e.target.value)}
             onKeyDown={handleParticipantKeyDown}
             placeholder="Type a name and press Enter"
-            className={inputClass}
+            className={input}
           />
           <button
             type="button"
             onClick={addParticipant}
-            className="shrink-0 rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className={`${buttonSecondary} shrink-0`}
           >
             Add
           </button>
         </div>
         {participants.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-2">
+          <ul className="mt-2 flex flex-wrap gap-1.5">
             {participants.map((participant) => (
               <li
                 key={participant}
-                className="flex items-center gap-1 rounded-full bg-zinc-100 py-1 pl-3 pr-1 text-sm text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200"
+                className="flex items-center gap-1 rounded-sm border border-line bg-surface-2 py-0.5 pl-2 pr-0.5 text-sm text-fg"
               >
                 {participant}
                 <button
                   type="button"
                   onClick={() => removeParticipant(participant)}
                   aria-label={`Remove ${participant}`}
-                  className="rounded-full px-1.5 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+                  className="rounded-sm px-1.5 text-faint hover:bg-danger-soft hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
                 >
                   ×
                 </button>
@@ -177,7 +175,7 @@ export function MeetingForm({
       <fieldset>
         <legend className={labelClass}>Tags</legend>
         {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => {
               const selected = tagIds.includes(tag.id);
               return (
@@ -186,25 +184,25 @@ export function MeetingForm({
                   type="button"
                   onClick={() => toggleTag(tag.id)}
                   aria-pressed={selected}
-                  className={`rounded-full border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 ${
+                  className={`rounded-sm border px-2 py-1 font-mono text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
                     selected
-                      ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                      : "border-zinc-300 text-zinc-700 hover:border-zinc-500 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500"
+                      ? "border-accent bg-accent-soft text-fg"
+                      : "border-line-strong text-muted hover:border-muted hover:text-fg"
                   }`}
                 >
-                  {selected && <span aria-hidden="true">✓ </span>}
+                  {selected && <span aria-hidden="true" className="text-accent-fg">✓ </span>}
+                  <span aria-hidden="true" className={selected ? "text-accent-fg" : "text-faint"}>
+                    #
+                  </span>
                   {tag.name}
                 </button>
               );
             })}
           </div>
         ) : (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-muted">
             No tags yet.{" "}
-            <Link
-              href="/tags"
-              className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
-            >
+            <Link href="/tags" className={textLink}>
               Create tags
             </Link>{" "}
             to group your meetings.
@@ -222,22 +220,19 @@ export function MeetingForm({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="What was discussed, decisions, next steps…"
-          className={inputClass}
+          className={input}
         />
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+      <div className="flex gap-2 border-t border-line pt-4">
+        <button type="submit" className={`${buttonPrimary} px-4`}>
           {submitLabel}
         </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className={`${buttonSecondary} px-4`}
           >
             Cancel
           </button>
