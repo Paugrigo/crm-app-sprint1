@@ -158,10 +158,13 @@ export function MeetingDetail({ id }: { id: string }) {
             <div className={fieldRow}>
               <dt className={label}>Date</dt>
               <dd>
-                <time dateTime={meeting.date} className="font-mono text-sm text-fg">
+                <time
+                  dateTime={meeting.date}
+                  title={formatMeetingDate(meeting.date)}
+                  className="font-mono text-sm text-fg"
+                >
                   {meeting.date}
                 </time>
-                <span className="ml-2 text-sm text-muted">{formatMeetingDate(meeting.date)}</span>
               </dd>
             </div>
             <div className={fieldRow}>
