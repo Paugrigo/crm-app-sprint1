@@ -32,8 +32,14 @@ Users can log new meetings, add participants and tags to them, and edit or delet
 - **Done:** deleting a meeting (trash-icon button on list items and on the meeting page, with a confirmation prompt). Deleting from the meeting page returns to `/`.
 - **Done:** editing a meeting (Edit button on the meeting page swaps the details for the meeting form, prefilled; Save changes or Cancel). Unsaved edits are dropped when navigating away.
 
-- **Done:** menu sidebar on every page (rendered by the root layout): a prominent Log a meeting button at the top (`/meetings/new`), All meetings, Tags, the 8 most recent meetings, and Settings at the bottom, with the current page highlighted. On phones it collapses into a top bar with a Menu button.
+- **Done:** menu sidebar on every page (rendered by the root layout): a prominent Log a meeting button at the top (`/meetings/new`), All meetings, Tags, Statistics, the 8 most recent meetings, and Settings at the bottom, with the current page highlighted. On phones it collapses into a top bar with a Menu button.
 - **Done:** tags. Tags page (`/tags`, Tags item in the sidebar) creates tags (names unique, ignoring case) and lists them sorted by name, with how many meetings use each. Tags can be renamed in place (pencil button; Enter saves, Escape cancels; same uniqueness rule; meetings show the new name since they store tag IDs) and deleted (trash button with a confirmation prompt; the tag is also removed from every meeting that uses it, but the meetings are kept). The meeting form has a tag picker (toggle chips); tags show on meeting list items and the meeting page.
+- **Done:** statistics page (`/statistics`, Statistics item in the sidebar). Only meetings dated up to today count (a note says how many later ones are left out):
+  - Overview cards: total meetings, this month vs last month, number of people met, average participants per meeting.
+  - Meetings per month for the last 12 months (bar chart, empty months included).
+  - Who you meet most, and who you haven't met in a while (top 5 each, with the last-met date). Participant names are free text, so they're matched ignoring case and extra spaces; each person shows their most-used spelling.
+  - Meetings by tag (plus Untagged; a meeting counts once per tag) and by day of the week (Monday first).
+  - Charts are plain CSS bars (no chart library).
 - **Not yet built:** filtering meetings by tag.
 - **Done:** settings page (`/settings`, Settings item pinned to the bottom of the sidebar):
   - **Appearance:** Light / Dark / System theme. System follows the OS setting live.
@@ -46,6 +52,7 @@ Users can log new meetings, add participants and tags to them, and edit or delet
 - `/meetings/new`: log a meeting (form); a static segment, so it takes precedence over `[id]`
 - `/meetings/[id]`: a single meeting; `id` is the meeting's `id` (a UUID)
 - `/tags`: create tags and list existing ones
+- `/statistics`: meeting statistics
 - `/settings`: theme and backup settings
 - Any other address: friendly "Page not found" page (`app/not-found.tsx`, HTTP 404) with a link back to `/`
 
@@ -91,6 +98,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 - `app/`: App Router pages and layouts (`layout.tsx`, `page.tsx`, `not-found.tsx`, `globals.css`)
   - `meetings/new/page.tsx`: log a meeting page
   - `tags/page.tsx`: tags page
+  - `statistics/page.tsx`: statistics page
   - `settings/page.tsx`: settings page
   - `meetings/[id]/page.tsx`: meeting page; reads `params` inside `<Suspense>` (required with Cache Components, since IDs are only known at runtime)
 - `components/`: UI components
@@ -103,6 +111,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
   - `delete-button.tsx`: generic trash-icon button with a confirmation prompt
   - `delete-meeting-button.tsx`: `DeleteButton` preset for meetings
   - `tags-manager.tsx`: client component for `/tags` (create form, list, rename, delete); browser-only, same rule
+  - `statistics.tsx`: client component for `/statistics` (cards, month chart, people lists, tag and weekday bars); browser-only, same rule
   - `meeting-tags.tsx`: a meeting's tags as small `#name` labels
   - `settings.tsx`: client component for `/settings` (theme switch, backup export/import); browser-only, same rule
   - `inline-script.tsx`: runs a script before hydration on full page loads (used for the theme, so there's no flash of the wrong colors)
@@ -111,6 +120,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 - `lib/use-meetings.ts`: `useMeetings()` hook for reading meetings in components
 - `lib/tags.ts`: `Tag` type, localStorage read/save, and change subscription (same pattern as `lib/meetings.ts`)
 - `lib/use-tags.ts`: `useTags()` hook
+- `lib/statistics.ts`: `computeStatistics()` (pure function over meetings, tags, and today's date) and date helpers for it
 - `lib/backup.ts`: backup file format (export, import, and merging imported data)
 - `lib/theme.ts`: theme preference (`crm.theme.v1` in localStorage), applying it as `data-theme` on `<html>`, and the inline script that applies it before first paint
 - `lib/use-theme.ts`: `useThemePreference()` hook

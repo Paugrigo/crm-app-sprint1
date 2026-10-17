@@ -173,6 +173,16 @@ function MainLinks({
             Tags
           </Link>
         </li>
+        <li>
+          <Link
+            href="/statistics"
+            onClick={onNavigate}
+            aria-current={pathname === "/statistics" ? "page" : undefined}
+            className={`${linkBase} ${pathname === "/statistics" ? linkActive : linkIdle}`}
+          >
+            Statistics
+          </Link>
+        </li>
       </ul>
     </>
   );
