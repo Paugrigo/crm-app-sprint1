@@ -132,6 +132,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 - `lib/use-theme.ts`: `useThemePreference()` hook
 - `lib/format-date.ts`: date display formatting
 - `public/`: static assets
+- `docs/screenshot.png`: the app screenshot in `README.md` (meeting log, dark theme, demo data); retake it when the look changes noticeably
 
 ## Keeping this file current
 
