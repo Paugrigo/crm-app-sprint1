@@ -9,6 +9,7 @@ import { saveMeetings, type Meeting } from "@/lib/meetings";
 import { useMeetings } from "@/lib/use-meetings";
 import { DeleteMeetingButton } from "./delete-meeting-button";
 import { MeetingForm } from "./meeting-form";
+import { MeetingTags } from "./meeting-tags";
 
 // Browser-only: meetings come from localStorage, which doesn't exist during prerendering.
 // Render inside a <Suspense> boundary.
@@ -163,6 +164,11 @@ export function MeetingDetail({ id }: { id: string }) {
             ) : (
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">No participants added.</p>
             )}
+          </section>
+
+          <section className="mt-6">
+            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Tags</h2>
+            <MeetingTags tagIds={meeting.tagIds} className="mt-2" emptyMessage="No tags." />
           </section>
 
           <section className="mt-6">

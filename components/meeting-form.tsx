@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent, type KeyboardEvent } from "react";
 import type { Meeting } from "@/lib/meetings";
+import { sortTags } from "@/lib/tags";
+import { useTags } from "@/lib/use-tags";
 import { DatePicker } from "./date-picker";
 
 type MeetingDraft = Omit<Meeting, "id">;
@@ -38,6 +41,12 @@ export function MeetingForm({
   const [participants, setParticipants] = useState<string[]>(initial?.participants ?? []);
   const [participantInput, setParticipantInput] = useState("");
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [tagIds, setTagIds] = useState<string[]>(initial?.tagIds ?? []);
+  const tags = sortTags(useTags());
+
+  function toggleTag(tagId: string) {
+    setTagIds(tagIds.includes(tagId) ? tagIds.filter((id) => id !== tagId) : [...tagIds, tagId]);
+  }
 
   function addParticipant() {
     const participant = participantInput.trim();
@@ -70,7 +79,16 @@ export function MeetingForm({
         ? [...participants, pending]
         : participants;
 
-    onSubmit({ name: name.trim(), date, participants: allParticipants, notes: notes.trim() });
+    // Drop IDs of tags that no longer exist.
+    const existingTagIds = tagIds.filter((id) => tags.some((tag) => tag.id === id));
+
+    onSubmit({
+      name: name.trim(),
+      date,
+      participants: allParticipants,
+      notes: notes.trim(),
+      tagIds: existingTagIds,
+    });
     if (initial) return;
 
     setName("");
@@ -78,6 +96,7 @@ export function MeetingForm({
     setParticipants([]);
     setParticipantInput("");
     setNotes("");
+    setTagIds([]);
   }
 
   return (
@@ -154,6 +173,44 @@ export function MeetingForm({
           </ul>
         )}
       </div>
+
+      <fieldset>
+        <legend className={labelClass}>Tags</legend>
+        {tags.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => {
+              const selected = tagIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  aria-pressed={selected}
+                  className={`rounded-full border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 ${
+                    selected
+                      ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                      : "border-zinc-300 text-zinc-700 hover:border-zinc-500 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500"
+                  }`}
+                >
+                  {selected && <span aria-hidden="true">✓ </span>}
+                  {tag.name}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            No tags yet.{" "}
+            <Link
+              href="/tags"
+              className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+            >
+              Create tags
+            </Link>{" "}
+            to group your meetings.
+          </p>
+        )}
+      </fieldset>
 
       <div>
         <label htmlFor="meeting-notes" className={labelClass}>

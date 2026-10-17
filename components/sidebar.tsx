@@ -163,6 +163,26 @@ function MainLinks({
             All meetings
           </Link>
         </li>
+        <li>
+          <Link
+            href="/tags"
+            onClick={onNavigate}
+            aria-current={pathname === "/tags" ? "page" : undefined}
+            className={`${linkBase} ${pathname === "/tags" ? linkActive : linkIdle}`}
+          >
+            Tags
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/statistics"
+            onClick={onNavigate}
+            aria-current={pathname === "/statistics" ? "page" : undefined}
+            className={`${linkBase} ${pathname === "/statistics" ? linkActive : linkIdle}`}
+          >
+            Statistics
+          </Link>
+        </li>
       </ul>
     </>
   );
