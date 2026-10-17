@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useLayoutEffect, useState } from "react";
 import { browser } from "react-dom";
@@ -62,6 +63,12 @@ export function MeetingDetail({ id }: { id: string }) {
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           It may have been deleted, or it was saved in a different browser.
         </p>
+        <Link
+          href="/"
+          className="mt-4 inline-block rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          Go to meeting log
+        </Link>
       </div>
     );
   }

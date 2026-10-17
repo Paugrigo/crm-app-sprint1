@@ -30,10 +30,13 @@ Users can log new meetings, add participants to them, and edit or delete them.
 - **Done:** deleting a meeting (trash-icon button on list items and on the meeting page, with a confirmation prompt). Deleting from the meeting page returns to `/`.
 - **Done:** editing a meeting (Edit button on the meeting page swaps the details for the meeting form, prefilled; Save changes or Cancel). Unsaved edits are dropped when navigating away.
 
+- **Rule:** no blank screens. Empty states (no meetings yet, no participants, no notes) and not-found states (unknown address, unknown meeting ID) always show a readable message, and not-found states link back to `/`.
+
 ### Routes
 
 - `/`: meeting log (form + list)
 - `/meetings/[id]`: a single meeting; `id` is the meeting's `id` (a UUID)
+- Any other address: friendly "Page not found" page (`app/not-found.tsx`, HTTP 404) with a link back to `/`
 
 ## Stack
 
@@ -69,7 +72,7 @@ Meetings are saved in the browser's `localStorage` so created items, edits, and 
 
 ## Project structure
 
-- `app/`: App Router pages and layouts (`layout.tsx`, `page.tsx`, `globals.css`)
+- `app/`: App Router pages and layouts (`layout.tsx`, `page.tsx`, `not-found.tsx`, `globals.css`)
   - `meetings/[id]/page.tsx`: meeting page; reads `params` inside `<Suspense>` (required with Cache Components, since IDs are only known at runtime)
 - `components/`: UI components
   - `meeting-log.tsx`: client component for `/` that owns meeting state and persistence; browser-only via `use(browser())`, so render it inside `<Suspense>`

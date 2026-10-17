@@ -12,9 +12,12 @@ export function MeetingList({
 }) {
   if (meetings.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-        No meetings logged yet.
-      </p>
+      <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
+        <p className="font-medium text-zinc-900 dark:text-zinc-100">No meetings logged yet</p>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          Use the form above to log your first meeting. It will show up here.
+        </p>
+      </div>
     );
   }
 
