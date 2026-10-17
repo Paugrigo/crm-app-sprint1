@@ -67,6 +67,7 @@ Users can log new meetings, add participants and tags to them, and edit or delet
 
 - **No backend.** No API routes, server databases, or external services. All data lives client-side.
 - **No user accounts.** No authentication or per-user data.
+- **Never commit on your own.** Only commit (and push or open a PR) when the user explicitly asks for it. Approving a plan that mentions committing doesn't count. When work is done, leave the changes uncommitted and say they're ready to commit.
 - **No new libraries without asking first.** This includes runtime dependencies and dev dependencies. Propose the library and the reason, then wait for approval before installing.
 
 ## Data storage
