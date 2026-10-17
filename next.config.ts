@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // The default (bottom-left) covers the Settings link at the bottom of the sidebar.
+  devIndicators: {
+    position: "bottom-right",
+  },
   turbopack: {
     rules: {
       "*.css": {
